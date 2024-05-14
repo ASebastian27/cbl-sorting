@@ -58,19 +58,35 @@ def readColor():
     redCounter = 0
     blueCounter = 0
     greenCounter = 0
+    
+    redSum = 0.0
+    greenSum = 0.0
+    blueSum = 0.0
+    
     for i in range (0, 1000):
         red = readRed()
         green = readGreen()
         blue = readBlue()
+        
+        redSum += red
+        greenSum += green
+        blueSum += blue
+        
+        # print(str(red) + " " + str(green) + " " + str(blue))
+        
+        debug = True
         if green < red and blue < red:
             redCounter += 1
-            print("Reading " + str(i) + ': red')
+            print("Reading " + str(i) + " " + 'red')
         elif red < green and blue < green:
             greenCounter += 1
-            print("Reading " + str(i) + ': green')
+            print("Reading " + str(i) + " " + 'green')
         elif green < blue  and red < blue:
             blueCounter += 1
-            print("Reading " + str(i) + ': blue')
+            print("Reading " + str(i) + " " + 'blue')
+            
+    print("red: "+ str(redCounter) + " green: " + str(greenCounter) + " blue: " + str(blueCounter))
+    print("redAvg: " + str(redSum/1000) + " green: " + str(greenSum/1000) + " blue: " + str(blueSum/1000))
     if redCounter >= greenCounter and redCounter >= blueCounter:
         return ("red")
     if blueCounter >= redCounter and blueCounter >= greenCounter:
@@ -78,7 +94,7 @@ def readColor():
     return("green")
         
         
-ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1.0)
+ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1.0)
 time.sleep(3)
 ser.reset_input_buffer()
 print("Ser ok")
@@ -88,6 +104,7 @@ try:
     
     while True:
         if keyboard.is_pressed('p'):
+            print('p')
             res = readColor()
             print(res)
             if res == "red":
@@ -101,6 +118,7 @@ try:
                 
             
         '''
+pppppprrrr
         red = readRed()
         blue = readBlue()
         green = readGreen()
