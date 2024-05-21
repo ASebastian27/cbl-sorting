@@ -35,7 +35,7 @@ greenBaseVal = 0
 numberCapacities = np.array([0, 0, 0])
 kgCapacities = np.array([0, 0, 0])
 
-ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1.0)
+ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1.0)
 def setup():
     ##Serial Communication Setup
     sleep(2)
@@ -123,7 +123,7 @@ def readColor():
         if readAttempts >= int(REREAD_ATTEMPTS-1): #retrying a number of times
             #print("BUZZ!!!")                      #before throwing an error
             return("error")
-        print("Reading not accurate. Trying agapin.\n*")
+        print("Reading not accurate. Trying again.\n*")
         readAttempts += 1
         return(readColor())
         
