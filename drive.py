@@ -3,149 +3,151 @@ import serial
 import time
 import keyboard
 import RPi.GPIO as GPIO
-import time
+from time import sleep
 
-s2 = 23
-s3 = 24
-signal = 25
-NUM_CYCLES = 10
-wait = 0.0001
+from picamera import PiCamera
+from picamera.array import PiRGBArray
+import numpy as np
+import cv2
 
+import sys
+from hx711v0_5_1 import HX711
 
+#Declare red bounds
+redLower = np.array([160, 150, 50])
+redUpper = np.array([180, 255, 255])
+
+#declare blue bounds
+blueLower = np.array([100, 150, 50])
+blueUpper = np.array([125, 255, 255])
+
+#declare green bounds
+greenLower = np.array([50, 150, 25])
+greenUpper = np.array([80, 255, 255])
+
+##GLOBAL VARIABLES
+readAttempts = 0
+BOLD = "\033[1m"
+
+redBaseVal = 0
+blueBaseVal = 0
+greenBaseVal = 0
+
+#Capacities
+numberCapacities = np.array([0, 0, 0])
+kgCapacities = np.array([0, 0, 0])
+
+ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1.0)
 def setup():
-  GPIO.setmode(GPIO.BCM)
-  GPIO.setup(signal,GPIO.IN, pull_up_down=GPIO.PUD_UP)
-  GPIO.setup(s2,GPIO.OUT)
-  GPIO.setup(s3,GPIO.OUT)
-  print("\n")
+    ##Serial Communication Setup
+    sleep(2)
+    ser.reset_input_buffer()
+    print("Serial connection OK")
+    
+    ##Camera Setup
+    global camera
+    global rawCapture
+    camera = PiCamera()
+    camera.resolution = (640, 480)
+    camera.framerate = 32
+    rawCapture = PiRGBArray(camera, size = (640, 480))
+    sleep(0.1)
+    print("Camera connection OK")
+    
+    ##HX711 Setup
+    hx1 = HX711(5, 6)
 
-def readRed():
-    GPIO.output(s2,GPIO.LOW)
-    GPIO.output(s3,GPIO.LOW)
-    time.sleep(wait)
-    start = time.time()
-    for impulse_count in range(NUM_CYCLES):
-      GPIO.wait_for_edge(signal, GPIO.FALLING)
-    duration = time.time() - start 
-    red  = NUM_CYCLES / duration
-    return red
+    ##TODO: Modify based on text file from website...
+    global numberCapacities
+    numberCapacities = np.array([0,0,0])
+    global kgCapacities
+    kgCapacities = np.array([0,0,0])
 
-def readBlue():
-    GPIO.output(s2,GPIO.LOW)
-    GPIO.output(s3,GPIO.HIGH)
-    time.sleep(wait)
-    start = time.time()
-    for impulse_count in range(NUM_CYCLES):
-      GPIO.wait_for_edge(signal, GPIO.FALLING)
-    duration = time.time() - start
-    blue = NUM_CYCLES / duration
-    return blue
-    
-def readGreen():
-    GPIO.output(s2,GPIO.HIGH)
-    GPIO.output(s3,GPIO.HIGH)
-    time.sleep(wait)
-    start = time.time()
-    for impulse_count in range(NUM_CYCLES):
-      GPIO.wait_for_edge(signal, GPIO.FALLING)
-    duration = time.time() - start
-    green = NUM_CYCLES / duration
-    return green
-    
-def readColor():
-    ser.write("green\n".encode('utf-8')) #restart servos in straight pos
-    
-    redCounter = 0
-    blueCounter = 0
-    greenCounter = 0
-    
-    redSum = 0.0
-    greenSum = 0.0
-    blueSum = 0.0
-    
-    for i in range (0, 1000):
-        red = readRed()
-        green = readGreen()
-        blue = readBlue()
-        
-        redSum += red
-        greenSum += green
-        blueSum += blue
-        
-        # print(str(red) + " " + str(green) + " " + str(blue))
-        
-        debug = True
-        if green < red and blue < red:
-            redCounter += 1
-            print("Reading " + str(i) + " " + 'red')
-        elif red < green and blue < green:
-            greenCounter += 1
-            print("Reading " + str(i) + " " + 'green')
-        elif green < blue  and red < blue:
-            blueCounter += 1
-            print("Reading " + str(i) + " " + 'blue')
-            
-    print("red: "+ str(redCounter) + " green: " + str(greenCounter) + " blue: " + str(blueCounter))
-    print("redAvg: " + str(redSum/1000) + " green: " + str(greenSum/1000) + " blue: " + str(blueSum/1000))
-    if redCounter >= greenCounter and redCounter >= blueCounter:
-        return ("red")
-    if blueCounter >= redCounter and blueCounter >= greenCounter:
-        return ("blue")
-    return("green")
-        
-        
-ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1.0)
-time.sleep(3)
-ser.reset_input_buffer()
-print("Ser ok")
-
-try:
-    setup()
-    
-    while True:
-        if keyboard.is_pressed('p'):
-            print('p')
-            res = readColor()
-            print(res)
-            if res == "red":
-                ser.write("red\n".encode('utf-8'))
-            elif res == "blue":
-                ser.write("blue\n".encode('utf-8'))
-            elif res == 'green':
-                ser.write("green\n".encode('utf-8'))
-        elif keyboard.is_pressed('r'):
-            ser.write("green\n".encode('utf-8'))
-                
-            
-        '''
-pppppprrrr
-        red = readRed()
-        blue = readBlue()
-        green = readGreen()
-        prpppppp
-        if green < red and blue < red:
-            print("red")
-        if blue < green:
-            print("green")
-        if green < blue  and red < blue:
-            print("blue")
-
-        if keyboard.is_pressed('r'):
-            print("Suuiiii")
-            ser.write("Ronaldo\n".encode('utf-8'))
-            time.sleep(3)
-            ser.write("Maradona\n".encode('utf-8'))
-        elif keyboard.is_pressed('m'):
-            print("Ankara messi")
-            ser.write("Messi\n".encode('utf-8'))
-            time.sleep(3)
-            ser.write("Maradona\n".encode('utf-8'))
-        #time.sleep(1)
-        #print("Suuiiii")
-        #print("Ankara messi")
-        #ser.write("Messi\n".encode('utf-8'))
-        #ser.write("Maradona\n".encode('utf-8'))
-        '''
-except KeyboardInterrupt:
-    ser.write("green\n".encode('utf-8')) #restart servo in straight pos
+def closeAll():
+    camera.close()
+    ser.write("free\n".encode('utf-8'))
     ser.close()
+
+def readColor():
+    TOTAL_READINGS = 10
+    BIG_DIFF = 1000000
+    REREAD_ATTEMPTS = 3
+    
+    global readAttempts
+    
+    exitCount = 0
+    redCount = 0
+    greenCount = 0
+    blueCount = 0
+    
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        rawCapture.truncate(0)
+        if exitCount == TOTAL_READINGS:
+            break
+        else:
+            exitCount += 1
+            
+        img = frame.array
+    
+        #convert each frame to HSV and apply masks
+        hsvImage = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        redMask = cv2.inRange(hsvImage, redLower, redUpper)
+        greenMask = cv2.inRange(hsvImage, greenLower, greenUpper)
+        blueMask = cv2.inRange(hsvImage, blueLower, blueUpper)
+        
+        #get pixel sums and print
+        hasRed = np.sum(redMask) - redBaseVal
+        hasGreen = np.sum(greenMask) - greenBaseVal
+        hasBlue = np.sum(blueMask) - blueBaseVal
+        print(str(exitCount) + " r:" + str(hasRed) + " g:" + str(hasGreen) + " b:" + str(hasBlue))
+        
+        # check whether there is a big difference between the colors
+        # 1.000.000 seems to be a good confidence value
+        if hasRed > hasGreen and hasRed - hasGreen > BIG_DIFF and hasRed > hasBlue and hasRed - hasBlue  > BIG_DIFF:
+            redCount += 1
+            #print("red incr")
+        elif hasGreen > hasRed and hasGreen - hasRed > BIG_DIFF and hasGreen > hasBlue and hasGreen - hasBlue > BIG_DIFF:
+            greenCount += 1
+            #print("green incr")
+        elif hasBlue > hasRed and hasBlue - hasRed > BIG_DIFF and hasBlue > hasGreen and hasBlue - hasGreen > BIG_DIFF:
+            blueCount += 1
+            #print("blue incr")      
+    print(str(redCount) + " " + str(greenCount) + " " + str(blueCount))
+    
+    #report color & reset attempt counter
+    if redCount > blueCount and redCount > greenCount and redCount >= int(TOTAL_READINGS/2):
+        readAttempts = 0
+        return("red")
+    elif blueCount > redCount and blueCount > greenCount and blueCount >= int(TOTAL_READINGS/2):
+        readAttempts = 0
+        return("blue")
+    elif greenCount > redCount and greenCount > blueCount and greenCount >= int(TOTAL_READINGS/2):
+        readAttempts = 0
+        return("green")
+    else:
+        if readAttempts >= int(REREAD_ATTEMPTS-1): #retrying a number of times
+            #print("BUZZ!!!")                      #before throwing an error
+            return("error")
+        print("Reading not accurate. Trying again.\n*")
+        readAttempts += 1
+        return(readColor())
+        
+def main():
+    try:
+        setup()
+        while True:
+            msg = "null"
+            if keyboard.is_pressed('p'):
+                color = readColor()
+                if color == "error":
+                    raise Exception(BOLD + "[!] Error reading object.")
+                msg = str(color) + "\n"
+                ser.write(msg.encode('utf-8'))
+                print(msg)
+    except Exception as e:
+        print(e)
+        closeAll()
+        return
+
+if __name__ == "__main__":
+    main()

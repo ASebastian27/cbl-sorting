@@ -15,6 +15,7 @@ GND to Raspberry Pi Pin 6 (GND)
 DT to Raspberry Pi Pin 29 (GPIO 5)
 SCK to Raspberry Pi Pin 31 (GPIO 6)
 '''
+
 hx = HX711(5, 6)
 
 '''
@@ -42,8 +43,8 @@ In my case, the longValueWithOffset was around 114000 so my reference unit is 11
 because if I used the 114000, I'd be getting milligrams instead of grams.
 '''
 
-referenceUnit = 1
-#hx.set_reference_unit(referenceUnit)
+referenceUnit = 114
+hx.set_reference_unit(referenceUnit)
 
 hx.reset()
 
@@ -57,7 +58,7 @@ print("Tare done! Add weight now...")
 
 while True:
     try:
-        # These three lines are usefull to debug wether to use MSB or LSB in the reading formats
+        # These three lines are useful to debug whether to use MSB or LSB in the reading formats
         # for the first parameter of "hx.set_reading_format("LSB", "MSB")".
         # Comment the two lines "val = hx.get_weight(5)" and "print val" and uncomment these three lines to see what it prints.
         
