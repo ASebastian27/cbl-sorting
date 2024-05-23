@@ -41,6 +41,9 @@ def printLongWithOffset(rawBytes):
 
 def printWeight(rawBytes):
     print(f"[WEIGHT] {hx.rawBytesToWeight(rawBytes)} gr")
+    
+def getWeight(rawBytes):
+    return hx.rawBytesToWeight(rawBytes)
 
 def printAll(rawBytes):
     longValue = hx.rawBytesToLong(rawBytes)
@@ -90,7 +93,7 @@ In my case, the longValueWithOffset was around 114000 so my reference unit is 11
 because if I used the 114000, I'd be getting milligrams instead of grams.
 '''
 
-referenceUnit = 114
+referenceUnit = 765
 print(f"[INFO] Setting the 'referenceUnit' at {referenceUnit}.")
 hx.setReferenceUnit(referenceUnit)
 print(f"[INFO] Finished setting the 'referenceUnit' at {referenceUnit}.")
@@ -103,6 +106,7 @@ if READ_MODE == READ_MODE_INTERRUPT_BASED:
 while True:
     try:
         if READ_MODE == READ_MODE_POLLING_BASED:
+            #getRawBytesAndPrintAll()
             getRawBytesAndPrintAll()
             
     except (KeyboardInterrupt, SystemExit):
