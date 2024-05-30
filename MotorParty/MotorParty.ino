@@ -48,11 +48,11 @@ void moveBigConveyor() {
 
 void punch() {
   // Dispense arm
-  servo2.write(120); // extend arm at max speed
-  delay(400);        // for 600ms
+  servo2.write(140); // extend arm at max speed
+  delay(500);        // for 600ms
   
-  servo2.write(60);   // retract arm at max speed
-  delay(400);        // for 800ms
+  servo2.write(40);   // retract arm at max speed
+  delay(500);        // for 800ms
   
   servo2.write(90);  // do nothing
   delay(1000);       // for 1s
@@ -101,13 +101,13 @@ void loop() {
     String message = Serial.readStringUntil('\n');
     if (message == "65") {
       Serial.print("Moving to RED pos\n");
-      servoMoveTo(65);
+      servoMoveTo(40);
       punch();
       moveBigConveyor();
       letFree();
     } else if (message == "135") {
       Serial.print("Moving to BLUE pos\n");
-      servoMoveTo(135);
+      servoMoveTo(110);
       punch();
       moveBigConveyor();
       letFree();
@@ -122,6 +122,10 @@ void loop() {
       letFree();
     } else if (message == "load") {
       moveSmallConveyor();
+    } else if (message == "punch") {
+      punch();
+    } else if (message == "big") {
+      moveBigConveyor();
     }
   }
 }
