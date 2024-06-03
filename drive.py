@@ -7,6 +7,10 @@ from time import sleep
 
 import sys
 from hx711v0_5_1 import HX711
+import numpy as np
+
+from picamera import PiCamera
+from picamera.array import PiRGBArray
 
 import camLib
 
@@ -28,13 +32,14 @@ SCK to Raspberry Pi Pin 31 (GPIO 6)
 
 ##GLOBAL VARIABLES
 global camera
+camera = PiCamera()
 BOLD = "\033[1m"
 
 #Capacities
 numberCapacities = np.array([0, 0, 0])
 kgCapacities = np.array([0, 0, 0])
 
-ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1.0)
+ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1.0)
 def setup():
     ##Serial Communication Setup
     sleep(2)
@@ -109,11 +114,11 @@ def weightClassToServoPos(weightClass):
     return servoPos
 
 def colorToServoPos(color):
-    servoPos = 0
+    servoPos = "third"
     if color == "red":
-        servoPos = 65
+        servoPos = "first"
     elif color == "blue":
-        servoPos = 135
+        servoPos = "second"
     return servoPos
 
 def getWeightClass(weight):
@@ -136,7 +141,7 @@ def main():
                 ser.write(msg.encode('utf-8'))
                 sleep(6)
                 
-                color = camLib.readColor()
+                color = camLib.readColor(camera)
                 if color == "error":
                     raise Exception(BOLD + "[!] Error reading object.")
                 msg = str(colorToServoPos(color)) + "\n"

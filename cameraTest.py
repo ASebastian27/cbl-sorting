@@ -12,11 +12,11 @@ sleep(0.1)
 redLower = np.array([160, 150, 50])
 redUpper = np.array([180, 255, 255])
 
-blueLower = np.array([100, 150, 50])
-blueUpper = np.array([125, 255, 255])
+blueLower = np.array([100, 150, 20])
+blueUpper = np.array([120, 255, 255])
 
-greenLower = np.array([50, 150, 25])
-greenUpper = np.array([80, 255, 255])
+greenLower = np.array([35, 150, 25])
+greenUpper = np.array([100, 255, 175])
 
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     img = frame.array
