@@ -13,27 +13,11 @@ from picamera import PiCamera
 from picamera.array import PiRGBArray
 
 import camLib
-
-READ_MODE_INTERRUPT_BASED = "--interrupt-based"
-READ_MODE_POLLING_BASED = "--polling-based"
-READ_MODE = READ_MODE_POLLING_BASED
-
-if READ_MODE == READ_MODE_POLLING_BASED:
-    print("[INFO] Read mode is 'polling based'.")
-else:
-    print("[INFO] Read mode is 'interrupt based'.")
-    
-'''
-VCC to Raspberry Pi 3.3V Pin
-GND to Raspberry Pi Pin 6 (GND)
-DT to Raspberry Pi Pin 29 (GPIO 5)
-SCK to Raspberry Pi Pin 31 (GPIO 6)
-'''
+import weightLib
 
 ##GLOBAL VARIABLES
 global camera
 camera = PiCamera()
-BOLD = "\033[1m"
 
 #Capacities
 numberCapacities = np.array([0, 0, 0])
@@ -44,16 +28,41 @@ def setup():
     ##Serial Communication Setup
     sleep(2)
     ser.reset_input_buffer()
-    print("Serial connection OK")
+    print("[INFO] Serial connection OK")
     
+    '''
+    Counting (with eth port DOWN)
+    1 2
+    3 4
+    5 6
+    7 8
+    ...
+
+    [HX1]
+    VCC to Raspberry Pi + (3.3V : Pin 1, Pin 17)
+    GND to Raspberry Pi Pin 6 (GND : Pin 6, Pin 9, Pin 14, Pin 20, 25, 30, 34, 39)
+    DT to Raspberry Pi Pin 29 (GPIO 5 : Pin 29)
+    SCK to Raspberry Pi Pin 31 (GPIO 6 : Pin 31)
+
+    Other Combinations
+    GPIO NRS    PIN NRS.
+    (5,   6) -> (29, 31)
+    (17, 22) -> (11, 13)
+    (23, 24) -> (16, 18)
+    (16, 26) -> (36, 37)
+    '''
     ##HX711 Setup
     global hx1
     hx1 = HX711(5, 6)
+    READ_MODE_POLLING_BASED = "--polling-based"
+    READ_MODE = READ_MODE_POLLING_BASED
     hx1.setReadingFormat("MSB", "MSB")
     hx1.autosetOffset()
     offsetValue = hx1.getOffset()
     referenceUnit = 765
     hx1.setReferenceUnit(referenceUnit)
+    if (offsetValue != 0):
+        print("[INFO] HX1 connection OK")
 
     ##TODO: Modify based on text file from website...
     global numberCapacities
@@ -61,72 +70,10 @@ def setup():
     global kgCapacities
     kgCapacities = np.array([0,0,0])
 
-def printRawBytes(hx, rawBytes):
-    print(f"[RAW BYTES] {rawBytes}")
-
-def printLong(hx, rawBytes):
-    print(f"[LONG] {hx.rawBytesToLong(rawBytes)}")
-
-def printLongWithOffset(hx, rawBytes):
-    print(f"[LONG WITH OFFSET] {hx.rawBytesToLongWithOffset(rawBytes)}")
-
-def printWeight(hx, rawBytes):
-    print(f"[WEIGHT] {hx.rawBytesToWeight(rawBytes)} gr")
-    
-def getWeight(hx, rawBytes):
-    return hx.rawBytesToWeight(rawBytes)
-
-def printAll(hx, rawBytes):
-    longValue = hx.rawBytesToLong(rawBytes)
-    longWithOffsetValue = hx.rawBytesToLongWithOffset(rawBytes)
-    weightValue = hx.rawBytesToWeight(rawBytes)
-    print(f"[INFO] INTERRUPT_BASED | longValue: {longValue} | longWithOffsetValue: {longWithOffsetValue} | weight (grams): {weightValue}")
-
-def getRawBytesAndPrintAll(hx):
-    rawBytes = hx.getRawBytes()
-    longValue = hx.rawBytesToLong(rawBytes)
-    longWithOffsetValue = hx.rawBytesToLongWithOffset(rawBytes)
-    weightValue = hx.rawBytesToWeight(rawBytes)
-    print(f"[INFO] POLLING_BASED | longValue: {longValue} | longWithOffsetValue: {longWithOffsetValue} | weight (grams): {weightValue}")
-
-def getGrams(hx):
-    rawBytes = hx.getRawBytes()
-    weightValue = hx.rawBytesToWeight(rawBytes)
-    return weightValue
-    
-def getWeightClass(weightValue):
-    if(weightValue < 15 and weightValue > 5):
-        weightClass = "red"
-    elif(weightValue < 40 and weightValue >15):
-        weightClass = "blue"
-    elif(weightValue > 40):
-        weightClass = "green"
-    return weightClass
-
-def weightClassToServoPos(weightClass):
-    servoPos = 0
-    if weightClass == "heavy":
-        servoPos = 0
-    elif weightClass == "medium":
-        servoPos = 65
-    elif weightClass == "light":
-        servoPos = 135
-    return servoPos
-
-def colorToServoPos(color):
-    servoPos = "third"
-    if color == "red":
-        servoPos = "first"
-    elif color == "blue":
-        servoPos = "second"
-    return servoPos
-
-def getWeightClass(weight):
-    if weight > 5 and weight < 10:
-        return "light"
-    elif weight > 10 and weight < 25:
-        return "medium"
-    return "heavy"
+def getSortingMode():
+    # Get Sorting Mode from Website
+    # ...
+    return "COLOR_BASED"
 
 def main():
     try:
@@ -135,31 +82,26 @@ def main():
 
         while True:
             msg = "null"
+
             if keyboard.is_pressed('p'):
-                sleep(0.5)
+                sleep(1)
                 msg = "load\n"
                 ser.write(msg.encode('utf-8'))
                 sleep(6)
+
+                SORTING_MODE = getSortingMode()
+                if SORTING_MODE == "COLOR_BASED":
+                    color = camLib.readColor(camera)
+                    camLib.handleErrors(color)
+                    msg = str(camLib.colorToServoPos(color)) + "\n"
+                    
+                elif SORTING_MODE == "WEIGHT_BASED":
+                    weightValue = weightLib.getGrams(hx1)
+                    weightClass = weightLib.getWeightClass(weightValue)
+                    msg = str(weightLib.weightClassToServoPos(weightClass)) + "\n"
                 
-                color = camLib.readColor(camera)
-                if color == "error":
-                    raise Exception(BOLD + "[!] Error reading object.")
-                msg = str(colorToServoPos(color)) + "\n"
                 ser.write(msg.encode('utf-8'))
-                
                 print(msg)
-            elif keyboard.is_pressed('g'):
-                sleep(0.5)
-                msg = "load\n"
-                ser.write(msg.encode('utf-8'))
-                sleep(6)
-                
-                weightValue = getGrams(hx1)
-                print(weightValue)
-                weightClass = getWeightClass(weightValue)
-                msg = str(weightClassToServoPos(weightClass)) + "\n"
-                ser.write(msg.encode('utf-8'))
-                #print(msg)
                 
     except Exception as e:
         print(e)
