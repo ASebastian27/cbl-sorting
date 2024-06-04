@@ -3,6 +3,7 @@ from picamera.array import PiRGBArray
 from time import sleep
 import numpy as np
 import cv2
+import camLib
 camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 32
@@ -12,13 +13,38 @@ sleep(0.1)
 redLower = np.array([160, 150, 50])
 redUpper = np.array([180, 255, 255])
 
-blueLower = np.array([100, 150, 20])
+blueLower = np.array([93, 150, 25])
 blueUpper = np.array([120, 255, 255])
 
-greenLower = np.array([35, 150, 25])
-greenUpper = np.array([100, 255, 175])
+green_bgr = np.uint8([[[100,200,100]]])
+green_hsv = cv2.cvtColor(green_bgr,cv2.COLOR_BGR2HSV)
+#print(green_hsv)
+
+greenLower = np.array([36, 100, 25])
+greenUpper = np.array([93, 255, 255]) #175
+
+readAttempts = 0
+
+redBaseVal = 0
+blueBaseVal = 0
+greenBaseVal = 0
+
+## Extract limits from first frame TODO
+camera.capture(rawCapture, format="bgr", use_video_port=True)
+image = rawCapture.array
+hsvImage = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+redMask = cv2.inRange(hsvImage, redLower, redUpper)
+greenMask = cv2.inRange(hsvImage, greenLower, greenUpper)
+blueMask = cv2.inRange(hsvImage, blueLower, blueUpper)
+
+redBaseVal = np.sum(redMask)
+blueBaseVal = np.sum(blueMask)
+greenBaseVal = np.sum(greenMask)
+
 
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        
     img = frame.array
     #cv2.imshow("Frame", image)
     hsvImage = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -26,9 +52,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     greenMask = cv2.inRange(hsvImage, greenLower, greenUpper)
     blueMask = cv2.inRange(hsvImage, blueLower, blueUpper)
     
-    hasRed = np.sum(redMask)
-    hasGreen = np.sum(greenMask)
-    hasBlue = np.sum(blueMask)
+    hasRed = max((np.sum(redMask) - redBaseVal), 0)
+    hasGreen = max((np.sum(greenMask) - greenBaseVal), 0)
+    hasBlue = max((np.sum(blueMask) - blueBaseVal), 0)
     print("r:" + str(hasRed) + " g:" + str(hasGreen) + " b:" + str(hasBlue))
     
     cv2.imshow("red", redMask)

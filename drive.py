@@ -3,6 +3,7 @@ import serial
 import time
 import keyboard
 import RPi.GPIO as GPIO
+import cv2
 from time import sleep
 
 import sys
