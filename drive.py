@@ -60,7 +60,7 @@ def setup():
     hx1.setReadingFormat("MSB", "MSB")
     hx1.autosetOffset()
     offsetValue = hx1.getOffset()
-    referenceUnit = 765
+    referenceUnit = 630
     hx1.setReferenceUnit(referenceUnit)
     if (offsetValue != 0):
         print("[INFO] HX1 connection OK")
@@ -74,7 +74,7 @@ def setup():
 def getSortingMode():
     # Get Sorting Mode from Website
     # ...
-    return "COLOR_BASED"
+    return "WEIGHT_BASED"
 
 def main():
     try:
@@ -102,7 +102,15 @@ def main():
                     msg = str(weightLib.weightClassToServoPos(weightClass)) + "\n"
                 
                 ser.write(msg.encode('utf-8'))
+                sleep(3)
                 print(msg)
+            if keyboard.is_pressed('r'):
+                sleep(1)
+                print("[INFO] Automatically setting the offset.")
+                hx1.autosetOffset()
+                offsetValue = hx1.getOffset()
+                print(f"[INFO] Finished automatically setting the offset. The new value is '{offsetValue}'.")
+                print("[INFO] You can add weight now!")
                 
     except Exception as e:
         print(e)
