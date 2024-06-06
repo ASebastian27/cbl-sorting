@@ -7,10 +7,12 @@ import cv2
 from time import sleep
 
 global rawCapture
-global piCamera
+global piCamera 
 BOLD = "\033[1m"
 
 ##Camera Setup
+def getImg():
+    return img
 def cameraSetup(camera):
     global rawCapture
     camera.resolution = (640, 480)
@@ -20,19 +22,23 @@ def cameraSetup(camera):
     print("Camera connection OK")
 
 ##Colors Definitions
-redLower = np.array([160, 150, 50])
+redLower = np.array([160, 100, 50])
 redUpper = np.array([180, 255, 255])
 
-blueLower = np.array([100, 150, 20])
+blueLower = np.array([93, 150, 25])
 blueUpper = np.array([120, 255, 255])
 
-greenLower = np.array([35, 150, 25])
-greenUpper = np.array([100, 255, 175])
+green_bgr = np.uint8([[[100,200,100]]])
+green_hsv = cv2.cvtColor(green_bgr,cv2.COLOR_BGR2HSV)
+#print(green_hsv)
+
+greenLower = np.array([36, 100, 25])
+greenUpper = np.array([93, 255, 255]) #175
 
 readAttempts = 0
-redBaseVal = 100000
-blueBaseVal = 2000
-greenBaseVal = 1000000
+redBaseVal = 2000
+blueBaseVal = 180000
+greenBaseVal = 3500000
 
 def closeAll(camera):
     camera.close()
@@ -87,9 +93,9 @@ def readColor(camera):
             blueCount += 1
             #print("blue incr")     
 
-        if (hasRed > CUBE_THRESHOLD*2 or hasGreen > CUBE_THRESHOLD*2 or hasBlue > CUBE_THRESHOLD*2):
+        if (hasRed > CUBE_THRESHOLD*4 or hasGreen > CUBE_THRESHOLD*4 or hasBlue > CUBE_THRESHOLD*4):
             tooManyPixels += 1
-        elif (hasRed + hasGreen + hasBlue > int(CUBE_THRESHOLD*2.5)):
+        elif (hasRed + hasGreen + hasBlue > int(CUBE_THRESHOLD*4)):
             tooManyPixels += 1
     print(str(redCount) + " " + str(greenCount) + " " + str(blueCount))
     
