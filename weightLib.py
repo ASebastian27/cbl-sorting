@@ -68,3 +68,6 @@ def getWeightClass(weight):
     elif weight > 10 and weight < 25:
         return "medium"
     return "heavy"
+
+def hxReset(hx):
+    hx.autosetOffset()

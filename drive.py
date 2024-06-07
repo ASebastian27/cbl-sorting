@@ -51,31 +51,43 @@ def setup():
     (17, 22) -> (11, 13)
     (23, 24) -> (16, 18)
     (16, 26) -> (36, 37)
+    
+    UNITS:
+    HX1: 630
+    HX2: 1000
     '''
     ##HX711 Setup
+    global hx_list
+    hx_list = []
+    refunit_list = [630, 1000, 0, 0]
     global hx1
     hx1 = HX711(5, 6)
+    hx_list.append(hx1)
+    
+    global hx2
+    hx2 = HX711(17, 27)
+    hx_list.append(hx2)
+    
     READ_MODE_POLLING_BASED = "--polling-based"
     READ_MODE = READ_MODE_POLLING_BASED
-    hx1.setReadingFormat("MSB", "MSB")
-    hx1.autosetOffset()
-    offsetValue = hx1.getOffset()
-    referenceUnit = 630
-    hx1.setReferenceUnit(referenceUnit)
-    if (offsetValue != 0):
-        print("[INFO] HX1 connection OK")
+    i = 0
+    for hx in hx_list:
+        hx.setReadingFormat("MSB", "MSB")
+        hx.autosetOffset()
+        offsetValue = hx.getOffset()
+        referenceUnit = refunit_list[i]
+        hx.setReferenceUnit(referenceUnit)
+        i += 1
+        print (offsetValue)
+        if (offsetValue != 0):
+            print(f"[INFO] HX{i} connection OK")
 
     ##TODO: Modify based on text file from website...
     global numberCapacities
     numberCapacities = np.array([0,0,0])
     global kgCapacities
     kgCapacities = np.array([0,0,0])
-
-def getSortingMode():
-    # Get Sorting Mode from Website
-    # ...
-    return "WEIGHT_BASED"
-
+ 
 def main():
     try:
         setup()
@@ -106,9 +118,10 @@ def main():
                 print(msg)
             if keyboard.is_pressed('r'):
                 sleep(1)
+                print(weightLib.getGrams(hx2))
                 print("[INFO] Automatically setting the offset.")
-                hx1.autosetOffset()
-                offsetValue = hx1.getOffset()
+                weightLib.hxReset(hx2)
+                offsetValue = hx2.getOffset()
                 print(f"[INFO] Finished automatically setting the offset. The new value is '{offsetValue}'.")
                 print("[INFO] You can add weight now!")
                 

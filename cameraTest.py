@@ -29,20 +29,6 @@ redBaseVal = 0
 blueBaseVal = 0
 greenBaseVal = 0
 
-## Extract limits from first frame TODO
-camera.capture(rawCapture, format="bgr", use_video_port=True)
-image = rawCapture.array
-hsvImage = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-redMask = cv2.inRange(hsvImage, redLower, redUpper)
-greenMask = cv2.inRange(hsvImage, greenLower, greenUpper)
-blueMask = cv2.inRange(hsvImage, blueLower, blueUpper)
-
-redBaseVal = np.sum(redMask)
-blueBaseVal = np.sum(blueMask)
-greenBaseVal = np.sum(greenMask)
-
-
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         
     img = frame.array
