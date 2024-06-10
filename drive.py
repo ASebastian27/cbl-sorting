@@ -26,7 +26,7 @@ BOLD = "\033[1m"
 numberCapacities = np.array([0, 0, 0])
 kgCapacities = np.array([0, 0, 0])
 
-ser = serial.Serial('/dev/ttyUSB1', 9600, timeout=1.0)
+ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1.0)
 def setup():
     ##Serial Communication Setup
     sleep(2)
@@ -61,7 +61,7 @@ def setup():
     ##HX711 Setup
     global hx_list
     hx_list = []
-    refunit_list = [775, 1000, 930, 915]
+    refunit_list = [900, 1000, 940, 445]
     global hx1
     hx1 = HX711(5, 6)
     hx_list.append(hx1)
@@ -123,19 +123,35 @@ def main():
                 elif SORTING_MODE == "WEIGHT_BASED":
                     weightValue = weightLib.getGrams(hx1)
                     weightClass = weightLib.getWeightClass(weightValue)
-                    msg = str(weightLib.weightClassToServoPos(weightClass)) + "\n"
+                    msg = str(weightLib.wpeightClassToServoPos(weightClass)) + "\n"
                 
                 ser.write(msg.encode('utf-8'))
                 sleep(10)
                 if color == "red":
-                    print(str(weightLib.verifyWeight(weightValue, weightLib.getGrams(hx2), 4.5)))
-                    print(weightLib.getGrams(hx2))
+                    if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx2), 4.5) == True:
+                        weightLib.hxReset(hx1)
+                        print("SUCCESS!" + str(weightLib.getGrams(hx2)))
+                        weightLib.hxReset(hx2)
+                        print("[INFO] Weight Reset, HX2 now has: !" + str(weightLib.getGrams(hx2)))
+                    else:
+                        print("ERROR")
                 elif color == "blue":
-                    print(weightLib.verifyWeight(weightValue, weightLib.getGrams(hx3), 4.5))
-                    print (weightLib.getGrams(hx3))
+                    if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx3), 4.5) == True:
+                        weightLib.hxReset(hx1)
+                        print("SUCCESS!" + str(weightLib.getGrams(hx3)))
+                        sleep(3)
+                        weightLib.hxReset(hx3)
+                        print("[INFO] Weight Reset, HX3 now has: " + str(weightLib.getGrams(hx2)))
+                    else:
+                        print("ERROR")
                 elif color == "green":
-                    print(weightLib.verifyWeight(weightValue, weightLib.getGrams(hx4), 4.5))
-                    print (weightLib.getGrams(hx4))
+                    if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx4), 4.5) == True:
+                        weightLib.hxReset(hx1)
+                        print("SUCCESS!" + str(weightLib.getGrams(hx4)))
+                        weightLib.hxReset(hx4)
+                        print("[INFO] Weight Reset, HX4 now has: !" + str(weightLib.getGrams(hx2)))
+                    else:
+                        print("ERROR")
                 
                 print(msg)
             if keyboard.is_pressed('r'):

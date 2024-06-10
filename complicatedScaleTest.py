@@ -28,7 +28,8 @@ GND to Raspberry Pi Pin 6 (GND)
 DT to Raspberry Pi Pin 29 (GPIO 5)
 SCK to Raspberry Pi Pin 31 (GPIO 6)
 '''
-hx = HX711(5, 6)
+hx = HX711(19, 26)
+referenceUnit = 445
 
 def printRawBytes(rawBytes):
     print(f"[RAW BYTES] {rawBytes}")
@@ -93,7 +94,6 @@ In my case, the longValueWithOffset was around 114000 so my reference unit is 11
 because if I used the 114000, I'd be getting milligrams instead of grams.
 '''
 
-referenceUnit = 775
 print(f"[INFO] Setting the 'referenceUnit' at {referenceUnit}.")
 hx.setReferenceUnit(referenceUnit)
 print(f"[INFO] Finished setting the 'referenceUnit' at {referenceUnit}.")

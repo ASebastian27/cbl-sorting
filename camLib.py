@@ -36,18 +36,18 @@ greenLower = np.array([36, 100, 25])
 greenUpper = np.array([93, 255, 255]) #175
 
 readAttempts = 0
-redBaseVal = 2000
-blueBaseVal = 180000
-greenBaseVal = 3500000
+redBaseVal = 44880
+blueBaseVal = 2020110
+greenBaseVal = 236385
 
 def closeAll(camera):
     camera.close()
 
 def readColor(camera):
     TOTAL_READINGS = 10       # Number of sub-readings per reading
-    BIG_DIFF = 1000000        # Min difference between values to conclude presence of a color
+    BIG_DIFF = 2000000        # Min difference between values to conclude presence of a color
     REREAD_ATTEMPTS = 3       # Number of times to re-attempts reading TOTAL_READING times before throwing
-    CUBE_THRESHOLD = 10000000 # Min value in a reading to conclude presence of a cube in frame
+    CUBE_THRESHOLD = 15000000 # Min value in a reading to conclude presence of a cube in frame
     
     global readAttempts
     

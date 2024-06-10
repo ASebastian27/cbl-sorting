@@ -4,6 +4,7 @@ import sys
 from hx711v0_5_1 import HX711
 import numpy as np
 import statistics
+from time import sleep
 
 def printRawBytes(hx, rawBytes):
     print(f"[RAW BYTES] {rawBytes}")
@@ -41,7 +42,7 @@ def getGrams(hx):
         gramsList.append(weightValue)
     
     #Prints entire array.
-    print(gramsList[:])
+    #print(gramsList[:])
     med = statistics.median(gramsList)
     print(f"[INFO] Median returned: {med}")
 
@@ -70,6 +71,7 @@ def getWeightClass(weight):
     return "heavy"
 
 def hxReset(hx):
+    sleep(2)
     hx.autosetOffset()
     
 def verifyWeight(a, b, delta):
