@@ -71,3 +71,8 @@ def getWeightClass(weight):
 
 def hxReset(hx):
     hx.autosetOffset()
+    
+def verifyWeight(a, b, delta):
+    if (abs(a-b) <= delta):
+        return True
+    return False

@@ -20,11 +20,13 @@ import weightLib
 global camera
 camera = PiCamera()
 
+BOLD = "\033[1m"
+
 #Capacities
 numberCapacities = np.array([0, 0, 0])
 kgCapacities = np.array([0, 0, 0])
 
-ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1.0)
+ser = serial.Serial('/dev/ttyUSB1', 9600, timeout=1.0)
 def setup():
     ##Serial Communication Setup
     sleep(2)
@@ -59,7 +61,7 @@ def setup():
     ##HX711 Setup
     global hx_list
     hx_list = []
-    refunit_list = [630, 1000, 0, 0]
+    refunit_list = [775, 1000, 930, 915]
     global hx1
     hx1 = HX711(5, 6)
     hx_list.append(hx1)
@@ -67,6 +69,14 @@ def setup():
     global hx2
     hx2 = HX711(17, 27)
     hx_list.append(hx2)
+    
+    global hx3
+    hx3 = HX711(23, 24)
+    hx_list.append(hx3)
+    
+    global hx4
+    hx4 = HX711(19, 26)
+    hx_list.append(hx4)
     
     READ_MODE_POLLING_BASED = "--polling-based"
     READ_MODE = READ_MODE_POLLING_BASED
@@ -102,9 +112,11 @@ def main():
                 ser.write(msg.encode('utf-8'))
                 sleep(6)
 
-                SORTING_MODE = getSortingMode()
+                SORTING_MODE = "COLOR_BASED"
                 if SORTING_MODE == "COLOR_BASED":
                     color = camLib.readColor(camera)
+                    print (f"Color is {color}! Item will be sorted to {color} bin.")
+                    weightValue = weightLib.getGrams(hx1)
                     camLib.handleErrors(color)
                     msg = str(camLib.colorToServoPos(color)) + "\n"
                     
@@ -114,7 +126,17 @@ def main():
                     msg = str(weightLib.weightClassToServoPos(weightClass)) + "\n"
                 
                 ser.write(msg.encode('utf-8'))
-                sleep(3)
+                sleep(10)
+                if color == "red":
+                    print(str(weightLib.verifyWeight(weightValue, weightLib.getGrams(hx2), 4.5)))
+                    print(weightLib.getGrams(hx2))
+                elif color == "blue":
+                    print(weightLib.verifyWeight(weightValue, weightLib.getGrams(hx3), 4.5))
+                    print (weightLib.getGrams(hx3))
+                elif color == "green":
+                    print(weightLib.verifyWeight(weightValue, weightLib.getGrams(hx4), 4.5))
+                    print (weightLib.getGrams(hx4))
+                
                 print(msg)
             if keyboard.is_pressed('r'):
                 sleep(1)
