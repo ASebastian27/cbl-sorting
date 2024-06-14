@@ -15,6 +15,11 @@ from picamera.array import PiRGBArray
 
 import camLib
 import weightLib
+
+#Capacities
+numberCapacities = np.array([0, 0, 0])
+webCapacities = np.array([2, 1, 3])
+
 ###########################################################
 from flask import Flask, render_template, request, jsonify
 
@@ -28,13 +33,16 @@ def index():
 @interface.route('/sorting', methods=['GET', 'POST'])
 def sorting():
     if request.method == 'POST':
-#         data = request.json
-#         value1 = data.get('value1')
-#         value2 = data.get('value2')
-#         print(f"Received values: value1 = {value1}, value2 = {value2}")
-        if request.form.get('start') == "confirm":
+         data = request.get_json()
+         webCapacities[0] = data.get("value1")
+         webCapacities[1] = data.get("value2")
+         webCapacities[2] = data.get("value3")
+         print("[INFO] Web capacities")
+         print(webCapacities[:])
+         if request.form.get('start') == "confirm":
             interface.logger.info('ROBOT OK')
             return render_template('americaNord.html')
+    return render_template('americaNord.html')
         
 @interface.route('/color', methods=['GET', 'POST'])
 def color():
@@ -55,10 +63,6 @@ def weight():
 ##GLOBAL VARIABLES
 global camera
 camera = PiCamera()
-
-#Capacities
-numberCapacities = np.array([0, 0, 0])
-kgCapacities = np.array([0, 0, 0])
 
 global ser
 ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1.0)
@@ -90,23 +94,42 @@ def setup():
     (16, 26) -> (36, 37)
     '''
     ##HX711 Setup
+    global hx_list
+    hx_list = []
+    refunit_list = [900, 1000, 940, 445]
     global hx1
     hx1 = HX711(5, 6)
+    hx_list.append(hx1)
+    
+    global hx2
+    hx2 = HX711(17, 27)
+    hx_list.append(hx2)
+    
+    global hx3
+    hx3 = HX711(23, 24)
+    hx_list.append(hx3)
+    
+    global hx4
+    hx4 = HX711(19, 26)
+    hx_list.append(hx4)
+    
     READ_MODE_POLLING_BASED = "--polling-based"
     READ_MODE = READ_MODE_POLLING_BASED
-    hx1.setReadingFormat("MSB", "MSB")
-    hx1.autosetOffset()
-    offsetValue = hx1.getOffset()
-    referenceUnit = 630
-    hx1.setReferenceUnit(referenceUnit)
-    if (offsetValue != 0):
-        print("[INFO] HX1 connection OK")
+    i = 0
+    for hx in hx_list:
+        hx.setReadingFormat("MSB", "MSB")
+        hx.autosetOffset()
+        offsetValue = hx.getOffset()
+        referenceUnit = refunit_list[i]
+        hx.setReferenceUnit(referenceUnit)
+        i += 1
+        print (offsetValue)
+        if (offsetValue != 0):
+            print(f"[INFO] HX{i} connection OK")
 
     ##TODO: Modify based on text file from website...
     global numberCapacities
     numberCapacities = np.array([0,0,0])
-    global kgCapacities
-    kgCapacities = np.array([0,0,0])
     
 def sendLoadMessage():
     sleep(1)
@@ -119,9 +142,48 @@ def sortByColor():
     msg = "null"
     sendLoadMessage()
     color = camLib.readColor(camera)
+    weightValue = weightLib.getGrams(hx1)
     camLib.handleErrors(color)
     msg = str(camLib.colorToServoPos(color)) + "\n"
-    sendMessage(msg)
+    if color == "red":
+        if numberCapacities[0] < webCapacities[0]:
+            sendMessage(msg)
+            sleep(8)
+            if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx2), 4.5) == True:
+                numberCapacities[0] += 1
+                weightLib.hxReset(hx1)
+                print(numberCapacities[:])
+                sleep(3)
+                weightLib.hxReset(hx2)
+                print("HX2 was reset. Current error is: " + str(weightLib.getGrams(hx2)))
+        else:
+            print("NU")
+    elif color == "blue":
+        if numberCapacities[1] < webCapacities[1]:
+            sendMessage(msg)
+            sleep(8)
+            if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx3), 4.5) == True:
+                numberCapacities[1] += 1
+                weightLib.hxReset(hx1)
+                print(numberCapacities[:])
+                sleep(3)
+                weightLib.hxReset(hx3)
+                print("HX3 was reset. Current error is: " + str(weightLib.getGrams(hx3)))
+        else:
+            print("NU")
+    elif color == "green":
+        if numberCapacities[2] < webCapacities[2]:
+            sendMessage(msg)
+            sleep(8)
+            if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx4), 4.5) == True:
+                numberCapacities[2] += 1
+                weightLib.hxReset(hx1)
+                print(numberCapacities[:])
+                sleep(3)
+                weightLib.hxReset(hx4)
+                print("HX4 was reset. Current error is: " + str(weightLib.getGrams(hx4)))
+        else:
+            print("NU")
     return
 
 def sortByWeight():
@@ -130,7 +192,34 @@ def sortByWeight():
     weightValue = weightLib.getGrams(hx1)
     weightClass = weightLib.getWeightClass(weightValue)
     msg = str(weightLib.weightClassToServoPos(weightClass)) + "\n"
-    sendMessage(msg)
+    if weightClass == "light":
+        if numberCapacities[0] < webCapacities[0]:
+            sendMessage(msg)
+            sleep(8)
+            if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx2), 4.5) == True:
+                numberCapacities[0] += 1
+                weightLib.hxReset(hx1)
+                print(numberCapacities[:])
+                sleep(3)
+                weightLib.hxReset(hx2)
+                print("HX2 was reset. Current error is: " + str(weightLib.getGrams(hx2)))
+        else:
+            print("NU")
+    elif weightClass == "heavy":
+        if numberCapacities[1] < webCapacities[1]:
+            sendMessage(msg)
+            sleep(8)
+            if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx3), 4.5) == True:
+                numberCapacities[1] += 1
+                weightLib.hxReset(hx1)
+                print(numberCapacities[:])
+                sleep(3)
+                weightLib.hxReset(hx3)
+                print("HX3 was reset. Current error is: " + str(weightLib.getGrams(hx3)))
+        else:
+            print("NU")
+    elif weightClass == "UNKNOWN":
+        print("NU")
     return
     
 def sendMessage(msg):

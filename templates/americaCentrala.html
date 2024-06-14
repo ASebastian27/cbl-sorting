@@ -1,221 +1,200 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>ISAIAI AIRPORT</title>
-	<!--<link rel="stylesheet" href="nice.css">-->
-	<style>
-	body {
-		font-family: Arial, sans-serif;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		min-height: 100vh;
-		background: #6affea;
-		flex-direction: column;
-	}
-	
-	.title {
-		text-align: center;
-	}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISAIAI AIRPORT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #6affea;
+            flex-direction: column;
+        }
 
-	.content {
-		justify-content: center;
-		align-items: center;
-	}
+        .title {
+            text-align: center;
+        }
 
-	.buttons {
-		margin-top: 20px;
-		
-	}
+        .content {
+            justify-content: center;
+            align-items: center;
+        }
 
-	.button {
-		margin: 0 10px;
-		padding: 10px 20px;
-		font-size: 16px;
-		cursor: pointer;
-	}
+        .buttons {
+            margin-top: 20px;
+        }
 
-	.button {
-		background-color: #fd6c9e;
-		color: 	white;
-	}
-	
-	.counterGame {
-		display: grid;
-	}
-						  
-    .updateNumberDiv h2 {
-		color: white;
-		font-size: 25px;
-	}
-	
-	.updateNumberDiv2 h2 {
-		color: white;
-		font-size: 25px;
-	}
-	
-	.updateBtn {
-		font-size: 15px;
-		float: left;
-	}
-	
-	.updateBtn2 {
-		font-size: 15px;
-		float: right;
-	}
-	
-	.confirmBtn {
-		display: flex;
-		justify-content: center;
-		padding-top: 30px;
-		
-	}
-	</style>
+        .button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .button {
+            background-color: #fd6c9e;
+            color: white;
+        }
+
+        .counterGame {
+            display: grid;
+        }
+
+        .updateNumberDiv h2,
+        .updateNumberDiv2 h2 {
+            color: white;
+            font-size: 25px;
+        }
+
+        .updateBtn,
+        .updateBtn2 {
+            font-size: 15px;
+            float: right;
+        }
+
+        .confirmBtn {
+            display: flex;
+            justify-content: center;
+            padding-top: 30px;
+        }
+    </style>
 </head>
 <body>
-	<div class="container">
-		<header class="title">
-			<h1>
-				<!--<img src="update_config/ribbon.png" alt="Icon" class="icon">-->
-				ISAIAI AIRPORT</h1>
-		</header>
-		<h2>SELECT BIN CAPACITY:</h2>
-		<div class="content">
-			<!--<div class="counterGame" id="counterGame">-->
-				
-				<div class="updateBtn" id="updateBtn">
-                    <h1 align="center">
-					<font color="white">BIN 1</font>
-					</h1>
-					<h2 style="font-size: 40px;" align="center" class="updateNumber" id="updateNumber"></h2>
+    <div class="container">
+        <header class="title">
+            <h1>ISAIAI AIRPORT</h1>
+        </header>
+        <h2>SELECT BIN CAPACITY:</h2>
+        <div class="content">
+            <div class="updateBtn" id="updateBtn">
+                <h1 align="center"><font color="white">BIN 1</font></h1>
+                <h2 style="font-size: 40px;" align="center" class="updateNumber" id="updateNumber"></h2>
 					<button id="decrement">-</button>
 					<button id="reset">Reset</button>
 					<button id="increment">+</button>
-				</div>
-				
-				<div class="updateBtn2" id="updateBtn2">
-					<h1 align="center">
-					<font color="white">BIN 2</font>
-					</h1>
-					<h2 style="font-size: 40px;" align="center" class="updateNumber2" id="updateNumber2"></h2>
-					<button id="decrement2">-</button>
-					<button id="reset2">Reset</button>
-					<button id="increment2">+</button>
-				</div>
-			
-		</div>	
-     </div>		    
-	<!--/
-	<form method="post" action="/">
-		<button type="submit" name="sorting", value="color">COLOR</button>
-		<button type="submit" name="sorting", value="weight">WEIGHT</button>
-	</form>
-	-->
-	<div class="confirmBtn">
-			<form method="post" action="/sorting ">
-				<button onclick="updateValues()" class="button confirm" type="submit" name="start", value="confirm">CONFIRM</button>
-			</form>
-	    </div>
-	<script>
-	let updateBtn = document.querySelectorAll(".updateBtn button");
-	let updateNumber = document.getElementById("updateNumber");
-	let score = 0;
+            </div>
+            <div class="updateBtn2" id="updateBtn2">
+                <h1 align="center"><font color="white">BIN 2</font></h1>
+                <h2 style="font-size: 40px;" align="center" class="updateNumber2" id="updateNumber2"></h2>
+                <button id="decrement2">-</button>
+                <button id="reset2">Reset</button>
+                <button id="increment2">+</button>
+            </div>
+            <div class="updateBtn3" id="updateBtn3">
+                <h1 align="center"><font color="white">BIN 3</font></h1>
+                <h2 style="font-size: 40px;" align="center" class="updateNumber3" id="updateNumber3"></h2>
+                <button id="decrement3">-</button>
+                <button id="reset3">Reset</button>
+                <button id="increment3">+</button>
+            </div>
+        </div>
+    </div>        
+    <div class="confirmBtn">
+		<form action="/sorting">
+			<button onclick="updateValues()" class="button confirm" type="submit" value="confirm" name="start">CONFIRM</button>
+        </form>
+    </div>
+    
+    <script>
+        let updateBtn = document.querySelectorAll(".updateBtn button");
+        let updateNumber = document.getElementById("updateNumber");
+        let score = 0;
 
-	const updateScore = () => {
-		updateNumber.textContent = score;
-		if (score > 0) {
-			updateNumber.style.color = "#fd6c9e";
-		} if (score < 0) {
-			updateNumber.style.color = "red";
-		} else if (score === 0) {
-			updateNumber.style.color = "#FFFFFF";
-		}
-	}
+        const updateScore = () => {
+            updateNumber.textContent = score;
+            updateNumber.style.color = score > 0 ? "#fd6c9e" : score < 0 ? "red" : "#FFFFFF";
+        }
 
-	updateBtn.forEach((button) => {
-		button.addEventListener("click", (e) => {
-			let btnId = e.target.id;
-			if (btnId === "increment" && score < 5) {
-				score++;
-				updateScore();
-				return;
-			} else if (btnId === "decrement" && score != 0) {
-				score--;
-				updateScore();
-				return;
-			} else if (btnId === "reset") {
-			  score = 0;
-			  updateScore();
-			  return;
-			}
-		})
-	})
+        updateBtn.forEach((button) => {
+            button.addEventListener("click", (e) => {
+                let btnId = e.target.id;
+                if (btnId === "increment" && score < 5) {
+                    score++;
+                } else if (btnId === "decrement" && score != 0) {
+                    score--;
+                } else if (btnId === "reset") {
+                    score = 0;
+                }
+                updateScore();
+            })
+        });
+        updateScore();
 
-	updateScore();
+        let updateBtn2 = document.querySelectorAll(".updateBtn2 button");
+        let updateNumber2 = document.getElementById("updateNumber2");
+        let score2 = 0;
 
-	let updateBtn2 = document.querySelectorAll(".updateBtn2 button");
-	let updateNumber2 = document.getElementById("updateNumber2");
-	let score2 = 0;
+        const updateScore2 = () => {
+            updateNumber2.textContent = score2;
+            updateNumber2.style.color = score2 > 0 ? "#fd6c9e" : score2 < 0 ? "red" : "#FFFFFF";
+        }
 
-	const updateScore2 = () => {
-		updateNumber2.textContent = score2;
-		if (score2 > 0) {
-			updateNumber2.style.color = "#fd6c9e";
-		} if (score2 < 0) {
-			updateNumber2.style.color = "red";
-		} else if (score2 === 0) {
-			updateNumber2.style.color = "#FFFFFF";
-		}
-	}
-
-	updateBtn2.forEach((button) => {
-		button.addEventListener("click", (e) => {
-			let btnId = e.target.id;
-			if (btnId === "increment2" && score2 < 5) {
-				score2++;
-				updateScore2();
-				return;
-			} else if (btnId === "decrement2" && score2 != 0) {
-				score2--;
-				updateScore2();
-				return;
-			} else if (btnId === "reset2") {
-			  score2 = 0;
-			  updateScore2();
-			  return;
-			}
-		})
-	})
-
-	updateScore2();
-	
-	
-/*function updateValues() {
-
-		fetch('/sorting', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({value1: score, value2: score2 })
-		})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('Network response not okay');
-			}
-			return response.json();
-		})
-		.then(responseData => {
-			console.log('Response from srver:', responseData);
-		})
-		catch(error => {
-			console.error('Error:', error);
-		});	
-} */
+        updateBtn2.forEach((button) => {
+            button.addEventListener("click", (e) => {
+                let btnId = e.target.id;
+                if (btnId === "increment2" && score2 < 5) {
+                    score2++;
+                } else if (btnId === "decrement2" && score2 != 0) {
+                    score2--;
+                } else if (btnId === "reset2") {
+                    score2 = 0;
+                }
+                updateScore2();
+            })
+        });
+        updateScore2();
+        
+        let updateBtn3 = document.querySelectorAll(".updateBtn3 button");
+        let updateNumber3 = document.getElementById("updateNumber3");
+        let score3 = 0;
+        
+        const updateScore3 = () => {
+            updateNumber3.textContent = score3;
+            updateNumber3.style.color = score3 > 0 ? "#fd6c9e" : score3 < 0 ? "red" : "#FFFFFF";
+        }
+        
+        updateBtn3.forEach((button) => {
+            button.addEventListener("click", (e) => {
+                let btnId = e.target.id;
+                if (btnId === "increment3" && score3 < 5) {
+                    score3++;
+                } else if (btnId === "decrement3" && score3 != 0) {
+                    score3--;
+                } else if (btnId === "reset3") {
+                    score3 = 0;
+                }
+                updateScore3();
+            })
+        });
+        updateScore3();
 
 
-	</script>
+
+        function updateValues() {
+            fetch('/sorting', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ value1: score, value2: score2, value3: score3 })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response not okay');
+                }
+                return response.json();
+            })
+            .then(responseData => {
+                console.log('Response from server:', responseData);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
 </body>
 </html>

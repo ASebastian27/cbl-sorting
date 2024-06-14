@@ -112,7 +112,7 @@ def main():
                 ser.write(msg.encode('utf-8'))
                 sleep(6)
 
-                SORTING_MODE = "COLOR_BASED"
+                SORTING_MODE = "WEIGHT_BASED"
                 if SORTING_MODE == "COLOR_BASED":
                     color = camLib.readColor(camera)
                     print (f"Color is {color}! Item will be sorted to {color} bin.")
@@ -123,7 +123,7 @@ def main():
                 elif SORTING_MODE == "WEIGHT_BASED":
                     weightValue = weightLib.getGrams(hx1)
                     weightClass = weightLib.getWeightClass(weightValue)
-                    msg = str(weightLib.wpeightClassToServoPos(weightClass)) + "\n"
+                    msg = str(weightLib.weightClassToServoPos(weightClass)) + "\n"
                 
                 ser.write(msg.encode('utf-8'))
                 sleep(10)

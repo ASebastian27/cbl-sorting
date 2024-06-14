@@ -56,19 +56,19 @@ def weightClassToServoPos(weightClass):
     '''
     servoPos = ""
     if weightClass == "heavy":
-        servoPos = "third"
-    elif weightClass == "medium":
         servoPos = "second"
     elif weightClass == "light":
         servoPos = "first"
+    elif weightClass == "UNKNOWN":
+        servoPos = "third"
     return servoPos
 
 def getWeightClass(weight):
-    if weight > 5 and weight < 10:
+    if weight > 2 and weight < 10:
         return "light"
-    elif weight > 10 and weight < 25:
-        return "medium"
-    return "heavy"
+    elif weight > 10 and weight < 20:
+        return "heavy"
+    return "UNKNOWN"
 
 def hxReset(hx):
     sleep(2)
