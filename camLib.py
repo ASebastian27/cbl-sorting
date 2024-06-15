@@ -93,9 +93,9 @@ def readColor(camera):
             blueCount += 1
             #print("blue incr")     
 
-        if (hasRed > CUBE_THRESHOLD*4 or hasGreen > CUBE_THRESHOLD*4 or hasBlue > CUBE_THRESHOLD*4):
+        if (hasRed > CUBE_THRESHOLD*4 or hasGreen > CUBE_THRESHOLD*2.5 or hasBlue > CUBE_THRESHOLD*2.5):
             tooManyPixels += 1
-        elif (hasRed + hasGreen + hasBlue > int(CUBE_THRESHOLD*4)):
+        elif (hasRed + hasGreen + hasBlue > int(CUBE_THRESHOLD*2.5)):
             tooManyPixels += 1
     print(str(redCount) + " " + str(greenCount) + " " + str(blueCount))
     
@@ -134,8 +134,17 @@ def colorToServoPos(color):
         servoPos = "second"
     return servoPos
 
+class BlockedCamException(Exception):
+    "Raised when camera is possibly blocked."
+    pass
+
+class OverloadedCamException(Exception):
+    "Raised when camera is possibly overloaded."
+    pass
+
 def handleErrors(color):
     if (color == "READING_ERROR"):
-        raise Exception(BOLD + "[!] Error reading object. Is the camera blocked?")
+        raise BlockedCamException(BOLD + "[!] Error reading object. Is the camera blocked?")
     elif (color == "OVERFLOW_ERROR"):
-        raise Exception(BOLD + "[!] Too much color in frame. Is it too crowded?")
+        raise OverloadedCamException(BOLD + "[!] Too much color in frame. Is it too crowded?")
+    return

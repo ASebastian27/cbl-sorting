@@ -73,8 +73,12 @@ def getWeightClass(weight):
 def hxReset(hx):
     sleep(2)
     hx.autosetOffset()
-    
+
+class LostObjectException(Exception):
+    "Raised when a loadcell encountered an unknown weight."
+    pass
+
 def verifyWeight(a, b, delta):
     if (abs(a-b) <= delta):
         return True
-    return False
+    raise LostObjectException
