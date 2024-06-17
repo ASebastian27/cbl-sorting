@@ -6,6 +6,9 @@ import numpy as np
 import statistics
 from time import sleep
 
+from exceptions import *
+from playsound import playsound
+
 def printRawBytes(hx, rawBytes):
     print(f"[RAW BYTES] {rawBytes}")
 
@@ -44,8 +47,9 @@ def getGrams(hx):
     #Prints entire array.
     #print(gramsList[:])
     med = statistics.median(gramsList)
-    print(f"[INFO] Median returned: {med}")
-
+    print(f"[INFO] Median registered: {med}")
+    if (med > 20):
+        raise UnknownWeightException
     return med
 
 def weightClassToServoPos(weightClass):
@@ -71,14 +75,10 @@ def getWeightClass(weight):
     return "UNKNOWN"
 
 def hxReset(hx):
-    sleep(2)
+    sleep(0.5)
     hx.autosetOffset()
-
-class LostObjectException(Exception):
-    "Raised when a loadcell encountered an unknown weight."
-    pass
 
 def verifyWeight(a, b, delta):
     if (abs(a-b) <= delta):
         return True
-    raise LostObjectException
+    return False

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISAIAI AIRPORT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #6affea;
+            flex-direction: column;
+        }
+
+        .title {
+            text-align: center;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #fd6c9e;
+            color: white;
+        }
+
+        .updateBtn, .updateBtn2, .updateBtn3 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            width: 200px; /* Ensure consistent width */
+        }
+
+        .updateBtn h1, .updateBtn2 h1, .updateBtn3 h1 {
+            margin-bottom: 10px; /* Space between the h1 and the buttons */
+            font-size: 24px;
+            color: white;
+            text-align: center; /* Center the text */
+            width: 100%; /* Ensure the h1 takes full width */
+        }
+
+        .updateBtn button, .updateBtn2 button, .updateBtn3 button {
+            margin: 5px 0;
+            padding: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: #fd6c9e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 80%; /* Ensure buttons take appropriate width */
+        }
+
+        .confirmBtn {
+            display: flex;
+            justify-content: center;
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="title">
+            <h1>ISAIAI AIRPORT</h1>
+        </header>
+        <h2 align="center">SELECT BIN CAPACITY:</h2>
+        <div class="content">
+            <div class="updateBtn" id="updateBtn">
+                <h1 align="center"><font color="white">BIN 1</font></h1>
+                <h2 style="font-size: 40px;" align="center" class="updateNumber" id="updateNumber"></h2>
+					<button id="decrement">-</button>
+					<button id="reset">Reset</button>
+					<button id="increment">+</button>
+            </div>
+            <div class="updateBtn2" id="updateBtn2">
+                <h1 align="center"><font color="white">BIN 2</font></h1>
+                <h2 style="font-size: 40px;" align="center" class="updateNumber2" id="updateNumber2"></h2>
+                <button id="decrement2">-</button>
+                <button id="reset2">Reset</button>
+                <button id="increment2">+</button>
+            </div>
+            <div class="updateBtn3" id="updateBtn3">
+                <h1 align="center"><font color="white">BIN 3</font></h1>
+                <h2 style="font-size: 40px;" align="center" class="updateNumber3" id="updateNumber3"></h2>
+                <button id="decrement3">-</button>
+                <button id="reset3">Reset</button>
+                <button id="increment3">+</button>
+            </div>
+        </div>
+    </div>        
+    <div class="confirmBtn">
+		<form action="/sorting", onsubmit="updateValues(event)">
+			<button id="#confirmButton" class="button confirm" type="submit" value="confirm" name="start">CHANGE CAPACITIES</button>
+        </form>
+    </div>
+    
+    <script>
+        let updateBtn = document.querySelectorAll(".updateBtn button");
+        let updateNumber = document.getElementById("updateNumber");
+        let score = 0;
+
+        const updateScore = () => {
+            updateNumber.textContent = score;
+            updateNumber.style.color = score > 0 ? "#fd6c9e" : score < 0 ? "red" : "#FFFFFF";
+        }
+
+        updateBtn.forEach((button) => {
+            button.addEventListener("click", (e) => {
+                let btnId = e.target.id;
+                if (btnId === "increment" && score < 3) {
+                    score++;
+                } else if (btnId === "decrement" && score != 0) {
+                    score--;
+                } else if (btnId === "reset") {
+                    score = 0;
+                }
+                updateScore();
+                post = 1
+                document.getElementById("#confirmButton").innerHTML = 'CHANGE CAPACITIES';
+            })
+        });
+        updateScore();
+
+        let updateBtn2 = document.querySelectorAll(".updateBtn2 button");
+        let updateNumber2 = document.getElementById("updateNumber2");
+        let score2 = 0;
+
+        const updateScore2 = () => {
+            updateNumber2.textContent = score2;
+            updateNumber2.style.color = score2 > 0 ? "#fd6c9e" : score2 < 0 ? "red" : "#FFFFFF";
+        }
+
+        updateBtn2.forEach((button) => {
+            button.addEventListener("click", (e) => {
+                let btnId = e.target.id;
+                if (btnId === "increment2" && score2 < 3) {
+                    score2++;
+                } else if (btnId === "decrement2" && score2 != 0) {
+                    score2--;
+                } else if (btnId === "reset2") {
+                    score2 = 0;
+                }
+                updateScore2();
+                post = 1
+                document.getElementById("#confirmButton").innerHTML = 'CHANGE CAPACITIES';
+            })
+        });
+        updateScore2();
+        
+        let updateBtn3 = document.querySelectorAll(".updateBtn3 button");
+        let updateNumber3 = document.getElementById("updateNumber3");
+        let score3 = 0;
+        
+        const updateScore3 = () => {
+            updateNumber3.textContent = score3;
+            updateNumber3.style.color = score3 > 0 ? "#fd6c9e" : score3 < 0 ? "red" : "#FFFFFF";
+        }
+        
+        updateBtn3.forEach((button) => {
+            button.addEventListener("click", (e) => {
+                let btnId = e.target.id;
+                if (btnId === "increment3" && score3 < 3) {
+                    score3++;
+                } else if (btnId === "decrement3" && score3 != 0) {
+                    score3--;
+                } else if (btnId === "reset3") {
+                    score3 = 0;
+                }
+                updateScore3();
+                post = 1
+                document.getElementById("#confirmButton").innerHTML = 'CHANGE CAPACITIES';
+            })
+        });
+        updateScore3();
+
+        let post = 1
+        function updateValues(event) {
+            if (event instanceof SubmitEvent) {
+                if (post == 0) {
+                    fetch('/sorting', {
+                        method: 'GET'
+                    })
+                    post = 1
+                    return;
+                }
+            }
+            post = 0
+            document.getElementById("#confirmButton").innerHTML = 'CONFIRM?';
+            event.preventDefault();
+            fetch('/sorting', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ value1: score, value2: score2, value3: score3 })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response not okay');
+                }
+                return response.json();
+            })
+            .then(responseData => {
+                console.log('Response from server:', responseData);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

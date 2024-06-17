@@ -16,9 +16,14 @@ from picamera.array import PiRGBArray
 import camLib
 import weightLib
 
+from playsound import playsound
+
 ##Capacities
 numberCapacities = np.array([0, 0, 0])
 webCapacities = np.array([0, 0, 0])
+
+##Exceptions
+from exceptions import *
 
 ###################################################################
 from flask import Flask, render_template, request, jsonify
@@ -37,54 +42,88 @@ def sorting():
          webCapacities[0] = data.get("value1")
          webCapacities[1] = data.get("value2")
          webCapacities[2] = data.get("value3")
-         print("[INFO] Web capacities")
+         global numberCapacities
+         numberCapacities = np.array([0, 0, 0])
+         print("[INFO] Web capacities", end=' ')
          print(webCapacities[:])
+         print("[INFO] Number capacities", end=' ')
+         print(numberCapacities[:])
          if request.form.get('start') == "confirm":
             interface.logger.info('ROBOT OK')
             return render_template('picker.html')
     return render_template('picker.html')
-        
-global currentlySorting
-currentlySorting = 0
 
+global isSorting
+isSorting = 0
 @interface.route('/color', methods=['GET', 'POST'])
 def color():
     if request.method == 'POST':
-        global currentlySorting
-        if request.form.get('sorting') == "next" and currentlySorting == 0:
+        global isSorting
+        print(isSorting)
+        if request.form.get('sorting') == "next" and isSorting == 0:
             interface.logger.info('SORT OK')
             try:
-                currentlySorting = 1
+                isSorting = 1
+                print("Started work")
                 sortByColor()
-                #print("Sorting...")
-                sleep(10) # Server side wait, prevents spamming.
-                currentlySorting = 0
-            except CapacityExceeded:
+                playsound('correct.mp3')
+                isSorting = 0
+                return render_template('colorButton.html')
+            except CapacityExceeded as e:
+                wrongSound()
+                isSorting = 0
                 return(render_template('capacitiesExceeded.html'))
-            except OverloadedCamException:
+            except OverloadedCamException as e:
+                wrongSound()
+                isSorting = 0
                 return(render_template('overloadedCamera.html'))
-            except BlockedCamException:
+            except BlockedCamException as e:
+                wrongSound()
+                isSorting = 0
                 return(render_template('blockedCamera.html'))
-            except LostObjectException:
+            except LostObjectException as e:
+                wrongSound()
+                isSorting = 0
                 return(render_template('lostObject.html'))
-    return render_template('colorButton.html')
+            except UnknownWeightException:
+                wrongSound()
+                isSorting = 0
+                return(render_template('UnknownWeightError.html'))
+            except Exception as e:
+                print(e)
+                wrongSound()
+                isSorting = 0
+                return(render_template('unknownError.html'))
+        return render_template('colorButton.html')
 
 @interface.route('/weight', methods=['GET', 'POST'])
 def weight():
     if request.method == 'POST':
-        global currentlySorting
-        if request.form.get('sorting') == "next" and currentlySorting == 0:
+        global isSorting
+        if request.form.get('sorting') == "next":
             interface.logger.info('SORT OK')
             try:
-                currentlySorting = 1
+                isSorting = 1
                 sortByWeight()
-                #print("Sorting...")
-                sleep(10) # Server side wait, prevents spamming.
-                currentlySorting = 0
+                playsound('correct.mp3')
+                isSorting = 0
             except CapacityExceeded:
+                wrongSound()
+                isSorting = 0
                 return(render_template('capacitiesExceeded.html'))
             except LostObjectException:
+                wrongSound()
+                isSorting = 0
                 return(render_template('lostObject.html'))
+            except UnknownWeightException:
+                wrongSound()
+                isSorting = 0
+                return(render_template('UnknownWeightError.html'))
+            except Exception as e:
+                print(e)
+                wrongSound()
+                isSorting = 0
+                return(render_template('unknownError.html'))
     return render_template('weightButton.html')
 ##############################################################################
 
@@ -94,6 +133,10 @@ camera = PiCamera()
 
 global ser
 ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1.0)
+
+def wrongSound():
+    playsound('wrong.mp3')
+
 def setup():
     ##Serial Communication Setup
     sleep(2)
@@ -154,36 +197,20 @@ def setup():
         print (offsetValue)
         if (offsetValue != 0):
             print(f"[INFO] HX{i} connection OK")
-
-##Exceptions
-class CapacityExceeded(Exception):
-    "Raised when bin capacity was exceeded."
-    pass
-class BlockedCamException(Exception):
-    "Raised when camera is possibly blocked."
-    pass
-class OverloadedCamException(Exception):
-    "Raised when camera is possibly overloaded."
-    pass
-class UnknownWeightException(Exception):
-    "Raised when a loadcell encountered an unknown weight."
-    pass
-class LostObjectException(Exception):
-    "Raised when a loadcell encountered an unknown weight."
-    pass
     
 def sendLoadMessage():
-    sleep(1)
+    sleep(0.5)
     msg = "load\n"
     ser.write(msg.encode('utf-8'))
     sleep(6)
 
 def sortByColor():
     # Reset all scales before sort
+    if weightLib.getGrams(hx1) > 2:
+        raise UnknownWeightException
     for hx in hx_list:
         weightLib.hxReset(hx)
-        sleep(1)
-        print(str(hx) + " was reset. Current error is: " + str(weightLib.getGrams(hx)))
+        # print(str(hx) + " was reset. Current error is: " + str(weightLib.getGrams(hx)))
 
     camLib.cameraSetup(camera)  
     msg = "null"
@@ -200,12 +227,13 @@ def sortByColor():
     if color == "red":
         if numberCapacities[0] < webCapacities[0]:
             sendMessage(msg)
-            sleep(8)
             #verifyWeight() can throw LostObjectException
             if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx2), 4.5) == True:
                 numberCapacities[0] += 1
                 print(numberCapacities[:])
-                sleep(3)
+                # sleep(3)
+            else:
+                raise LostObjectException
         else:
             raise CapacityExceeded
     elif color == "blue":
@@ -215,7 +243,9 @@ def sortByColor():
             if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx3), 4.5) == True:
                 numberCapacities[1] += 1
                 print(numberCapacities[:])
-                sleep(3)
+                # sleep(3)
+            else:
+                raise LostObjectException
         else:
             raise CapacityExceeded
     elif color == "green":
@@ -225,17 +255,20 @@ def sortByColor():
             if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx4), 4.5) == True:
                 numberCapacities[2] += 1
                 print(numberCapacities[:])
-                sleep(3)
+                # sleep(3)
+            else:
+                raise LostObjectException
         else:
             raise CapacityExceeded
     return
 
 def sortByWeight():
     # Reset all scales before weightsort
+    if weightLib.getGrams(hx1) > 2:
+        raise UnknownWeightException
     for hx in hx_list:
         weightLib.hxReset(hx)
-        sleep(1)
-        print(str(hx) + " was reset. Current error is: " + str(weightLib.getGrams(hx)))
+        # print(str(hx) + " was reset. Current error is: " + str(weightLib.getGrams(hx)))
 
     msg = "null"
     sendLoadMessage()
@@ -252,6 +285,8 @@ def sortByWeight():
                 numberCapacities[0] += 1
                 print(numberCapacities[:])
                 sleep(3)
+            else:
+                raise LostObjectException
         else:
             raise CapacityExceeded
     elif weightClass == "heavy":
@@ -262,6 +297,8 @@ def sortByWeight():
                 numberCapacities[1] += 1
                 print(numberCapacities[:])
                 sleep(3)
+            else:
+                raise LostObjectException
         else:
             raise CapacityExceeded
     elif weightClass == "UNKNOWN":
@@ -270,19 +307,19 @@ def sortByWeight():
     
 def sendMessage(msg):
     ser.write(msg.encode('utf-8'))
-    sleep(12)
+    sleep(8)
     print(msg)
     return
 
 def main():
     try:
         setup()
-        camLib.cameraSetup(camera)              
+        camLib.cameraSetup(camera)
     except Exception as e:
         print(e)
         camLib.closeAll(camera)
         return
-
+    
 if __name__ == "__main__":
     main()
     interface.run(debug=False, host='0.0.0.0', port=5000)
