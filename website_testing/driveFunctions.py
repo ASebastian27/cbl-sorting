@@ -8,7 +8,7 @@ from time import sleep
 numberCapacities = np.array([0, 0, 0])
 webCapacities = np.array([2, 1, 3])
 
-###########################################################
+###################################################################
 from flask import Flask, render_template, request, jsonify
 
 interface = Flask(__name__)
@@ -16,7 +16,7 @@ interface = Flask(__name__)
 #  interface.logger.info('COLOR')
 @interface.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('americaCentrala.html')
+    return render_template('landing.html')
 
 @interface.route('/sorting', methods=['GET', 'POST'])
 def sorting():
@@ -29,31 +29,51 @@ def sorting():
          print(webCapacities[:])
          if request.form.get('start') == "confirm":
             interface.logger.info('ROBOT OK')
-            return render_template('americaNord.html')
-    return render_template('americaNord.html')
+            return render_template('picker.html')
+    return render_template('picker.html')
         
+global currentlySorting
+currentlySorting = 0
 @interface.route('/color', methods=['GET', 'POST'])
 def color():
     if request.method == 'POST':
-        if request.form.get('sorting') == "next":
+        global currentlySorting
+        if request.form.get('sorting') == "next" and currentlySorting == 0:
+            interface.logger.info('SORT OK')
             try:
-                sortByColor()
-                interface.logger.info('ColorSort OK')
-            except Exception as e:
-                return render_template('europa.html')
-    return render_template('Baneasa.html')
+                currentlySorting = 1
+                #sortByColor()
+                print("Sorting...")
+                sleep(10) # Server side wait, prevents spamming.
+                currentlySorting = 0
+            except CapacityExceeded:
+                return(render_template('capacitiesExceeded.html'))
+            except OverloadedCamException:
+                return(render_template('overloadedCamera.html'))
+            except BlockedCamException:
+                return(render_template('blockedCamera.html'))
+            except LostObjectException:
+                return(render_template('lostObject.html'))
+    return render_template('colorButton.html')
 
 @interface.route('/weight', methods=['GET', 'POST'])
 def weight():
     if request.method == 'POST':
-        if request.form.get('sorting') == "next":
+        global currentlySorting
+        if request.form.get('sorting') == "next" and currentlySorting == 0:
+            interface.logger.info('SORT OK')
             try:
-                sortByColor()
-                interface.logger.info('WeightSort OK')
-            except Exception as e:
-                return render_template('europa.html')
-    return render_template('Dristor.html')
-##############################################################
+                currentlySorting = 1
+                #sortByWeight()
+                print("Sorting...")
+                sleep(10) # Server side wait, prevents spamming.
+                currentlySorting = 0
+            except CapacityExceeded:
+                return(render_template('capacitiesExceeded.html'))
+            except LostObjectException:
+                return(render_template('lostObject.html'))
+    return render_template('weightButton.html')
+##############################################################################
 def main():
     try:
         print(1+1)

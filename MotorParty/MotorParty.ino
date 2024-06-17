@@ -80,22 +80,6 @@ void letFree() {
   servoMoveTo(0);
 }
 
-void checkBin() { 
-  // Check if the bin has enough free capacity for the new box.
-  // Boxes have a color and a weight.
-  // Sorting mode 1: By Color
-  //          - Check if there is color capacity
-  // Sorting mode 2: By Weight
-  //          - Check if mass exceeds kilogram capacity
-}
-void updateBins() {
-  // Assume we are sorting item with weight n.
-  // Set bin load of bin to be -n.
-  // After a number of seconds, check if load is 0
-  // Not 0?   Something went wrong. Throw error.
-  // Is it 0? All good! Update weights. Continue with dispensing.
-}
-
 void loop() {
   if (Serial.available() > 0) {
     String message = Serial.readStringUntil('\n');

@@ -18,7 +18,7 @@ import weightLib
 
 ##Capacities
 numberCapacities = np.array([0, 0, 0])
-webCapacities = np.array([2, 1, 3])
+webCapacities = np.array([0, 0, 0])
 
 ###################################################################
 from flask import Flask, render_template, request, jsonify
@@ -28,7 +28,7 @@ interface = Flask(__name__)
 #  interface.logger.info('COLOR')
 @interface.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('americaCentrala.html')
+    return render_template('landing.html')
 
 @interface.route('/sorting', methods=['GET', 'POST'])
 def sorting():
@@ -41,38 +41,51 @@ def sorting():
          print(webCapacities[:])
          if request.form.get('start') == "confirm":
             interface.logger.info('ROBOT OK')
-            return render_template('americaNord.html')
-    return render_template('americaNord.html')
+            return render_template('picker.html')
+    return render_template('picker.html')
         
+global currentlySorting
+currentlySorting = 0
+
 @interface.route('/color', methods=['GET', 'POST'])
 def color():
     if request.method == 'POST':
-        if request.form.get('sorting') == "next":
+        global currentlySorting
+        if request.form.get('sorting') == "next" and currentlySorting == 0:
             interface.logger.info('SORT OK')
             try:
+                currentlySorting = 1
                 sortByColor()
+                #print("Sorting...")
+                sleep(10) # Server side wait, prevents spamming.
+                currentlySorting = 0
             except CapacityExceeded:
-                return(render_template('europa.html'))
+                return(render_template('capacitiesExceeded.html'))
             except OverloadedCamException:
-                return(render_template('europa.html')) #TODO: Change website
+                return(render_template('overloadedCamera.html'))
             except BlockedCamException:
-                return(render_template('europa.html')) #TODO: Change website
+                return(render_template('blockedCamera.html'))
             except LostObjectException:
-                return(render_template('europa.html')) #TODO: Change website
-    return render_template('Baneasa.html')
+                return(render_template('lostObject.html'))
+    return render_template('colorButton.html')
 
 @interface.route('/weight', methods=['GET', 'POST'])
 def weight():
     if request.method == 'POST':
-        if request.form.get('sorting') == "next":
+        global currentlySorting
+        if request.form.get('sorting') == "next" and currentlySorting == 0:
             interface.logger.info('SORT OK')
             try:
-                sortByWeight() 
+                currentlySorting = 1
+                sortByWeight()
+                #print("Sorting...")
+                sleep(10) # Server side wait, prevents spamming.
+                currentlySorting = 0
             except CapacityExceeded:
-                return(render_template('europa.html')) #TODO: Change website
+                return(render_template('capacitiesExceeded.html'))
             except LostObjectException:
-                return(render_template('europa.html')) #TODO: Change website
-    return render_template('Dristor.html')
+                return(render_template('lostObject.html'))
+    return render_template('weightButton.html')
 ##############################################################################
 
 ##GLOBAL VARIABLES
@@ -166,8 +179,16 @@ def sendLoadMessage():
     sleep(6)
 
 def sortByColor():
+    # Reset all scales before sort
+    for hx in hx_list:
+        weightLib.hxReset(hx)
+        sleep(1)
+        print(str(hx) + " was reset. Current error is: " + str(weightLib.getGrams(hx)))
+
     camLib.cameraSetup(camera)  
     msg = "null"
+
+    # Load item and analyze color & weight
     sendLoadMessage()
     color = camLib.readColor(camera)
     weightValue = weightLib.getGrams(hx1)
@@ -183,75 +204,64 @@ def sortByColor():
             #verifyWeight() can throw LostObjectException
             if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx2), 4.5) == True:
                 numberCapacities[0] += 1
-                weightLib.hxReset(hx1)
                 print(numberCapacities[:])
                 sleep(3)
-                weightLib.hxReset(hx2)
-                print("HX2 was reset. Current error is: " + str(weightLib.getGrams(hx2)))
         else:
             raise CapacityExceeded
     elif color == "blue":
         if numberCapacities[1] < webCapacities[1]:
             sendMessage(msg)
-            sleep(8)
             #verifyWeight() can throw LostObjectException
             if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx3), 4.5) == True:
                 numberCapacities[1] += 1
-                weightLib.hxReset(hx1)
                 print(numberCapacities[:])
                 sleep(3)
-                weightLib.hxReset(hx3)
-                print("HX3 was reset. Current error is: " + str(weightLib.getGrams(hx3)))
         else:
             raise CapacityExceeded
     elif color == "green":
         if numberCapacities[2] < webCapacities[2]:
             sendMessage(msg)
-            sleep(8)
             #verifyWeight() can throw LostObjectException
             if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx4), 4.5) == True:
                 numberCapacities[2] += 1
-                weightLib.hxReset(hx1)
                 print(numberCapacities[:])
                 sleep(3)
-                weightLib.hxReset(hx4)
-                print("HX4 was reset. Current error is: " + str(weightLib.getGrams(hx4)))
         else:
             raise CapacityExceeded
     return
 
 def sortByWeight():
+    # Reset all scales before weightsort
+    for hx in hx_list:
+        weightLib.hxReset(hx)
+        sleep(1)
+        print(str(hx) + " was reset. Current error is: " + str(weightLib.getGrams(hx)))
+
     msg = "null"
     sendLoadMessage()
+    # Load item and analyze weight
     weightValue = weightLib.getGrams(hx1)
     weightClass = weightLib.getWeightClass(weightValue)
+
     msg = str(weightLib.weightClassToServoPos(weightClass)) + "\n"
     if weightClass == "light":
         if numberCapacities[0] < webCapacities[0]:
             sendMessage(msg)
-            sleep(8)
             #verifyWeight() can throw LostObjectException
             if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx2), 4.5) == True:
                 numberCapacities[0] += 1
-                weightLib.hxReset(hx1)
                 print(numberCapacities[:])
                 sleep(3)
-                weightLib.hxReset(hx2)
-                print("HX2 was reset. Current error is: " + str(weightLib.getGrams(hx2)))
         else:
             raise CapacityExceeded
     elif weightClass == "heavy":
         if numberCapacities[1] < webCapacities[1]:
             sendMessage(msg)
-            sleep(8)
             #verifyWeight() can throw LostObjectException
             if weightLib.verifyWeight(weightValue, weightLib.getGrams(hx3), 4.5) == True:
                 numberCapacities[1] += 1
-                weightLib.hxReset(hx1)
                 print(numberCapacities[:])
                 sleep(3)
-                weightLib.hxReset(hx3)
-                print("HX3 was reset. Current error is: " + str(weightLib.getGrams(hx3)))
         else:
             raise CapacityExceeded
     elif weightClass == "UNKNOWN":
@@ -260,7 +270,7 @@ def sortByWeight():
     
 def sendMessage(msg):
     ser.write(msg.encode('utf-8'))
-    sleep(3)
+    sleep(12)
     print(msg)
     return
 

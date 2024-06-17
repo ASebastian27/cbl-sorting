@@ -48,8 +48,19 @@
 				ISAIAI AIRPORT</h1>
 		</header>
 		<main class="content">
-			<h2>TARE!</h2>
+			<h2>COLOR!</h2>
+			<form method="post">
+				<div class="buttons">
+					<button onclick="disableButton()" id = "sortButton" class="button sort" type="submit" name="sorting", value="next">SORT ITEM</button>
+				</div>
+			</form>
 		</main>
 
+		<script>
+			function disableButton() {
+				button = document.getElementById("sortButton")
+				button.textContent = "Please wait..."
+			}
+		</script>
 </body>
 </html>

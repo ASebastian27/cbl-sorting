@@ -20,12 +20,11 @@
         }
 
         .content {
+            display: flex;
             justify-content: center;
             align-items: center;
-        }
-
-        .buttons {
-            margin-top: 20px;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
         .button {
@@ -33,27 +32,38 @@
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
-        }
-
-        .button {
             background-color: #fd6c9e;
             color: white;
         }
 
-        .counterGame {
-            display: grid;
+        .updateBtn, .updateBtn2, .updateBtn3 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            width: 200px; /* Ensure consistent width */
         }
 
-        .updateNumberDiv h2,
-        .updateNumberDiv2 h2 {
+        .updateBtn h1, .updateBtn2 h1, .updateBtn3 h1 {
+            margin-bottom: 10px; /* Space between the h1 and the buttons */
+            font-size: 24px;
             color: white;
-            font-size: 25px;
+            text-align: center; /* Center the text */
+            width: 100%; /* Ensure the h1 takes full width */
         }
 
-        .updateBtn,
-        .updateBtn2 {
-            font-size: 15px;
-            float: right;
+        .updateBtn button, .updateBtn2 button, .updateBtn3 button {
+            margin: 5px 0;
+            padding: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: #fd6c9e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 80%; /* Ensure buttons take appropriate width */
         }
 
         .confirmBtn {
@@ -68,7 +78,7 @@
         <header class="title">
             <h1>ISAIAI AIRPORT</h1>
         </header>
-        <h2>SELECT BIN CAPACITY:</h2>
+        <h2 align="center">SELECT BIN CAPACITY:</h2>
         <div class="content">
             <div class="updateBtn" id="updateBtn">
                 <h1 align="center"><font color="white">BIN 1</font></h1>
@@ -94,8 +104,8 @@
         </div>
     </div>        
     <div class="confirmBtn">
-		<form action="/sorting">
-			<button onclick="updateValues()" class="button confirm" type="submit" value="confirm" name="start">CONFIRM</button>
+		<form action="/sorting", onsubmit="updateValues(event)">
+			<button id="#confirmButton" class="button confirm" type="submit" value="confirm" name="start">CHANGE CAPACITIES</button>
         </form>
     </div>
     
@@ -112,7 +122,7 @@
         updateBtn.forEach((button) => {
             button.addEventListener("click", (e) => {
                 let btnId = e.target.id;
-                if (btnId === "increment" && score < 5) {
+                if (btnId === "increment" && score < 3) {
                     score++;
                 } else if (btnId === "decrement" && score != 0) {
                     score--;
@@ -120,6 +130,8 @@
                     score = 0;
                 }
                 updateScore();
+                post = 1
+                document.getElementById("#confirmButton").innerHTML = 'CHANGE CAPACITIES';
             })
         });
         updateScore();
@@ -136,7 +148,7 @@
         updateBtn2.forEach((button) => {
             button.addEventListener("click", (e) => {
                 let btnId = e.target.id;
-                if (btnId === "increment2" && score2 < 5) {
+                if (btnId === "increment2" && score2 < 3) {
                     score2++;
                 } else if (btnId === "decrement2" && score2 != 0) {
                     score2--;
@@ -144,6 +156,8 @@
                     score2 = 0;
                 }
                 updateScore2();
+                post = 1
+                document.getElementById("#confirmButton").innerHTML = 'CHANGE CAPACITIES';
             })
         });
         updateScore2();
@@ -160,7 +174,7 @@
         updateBtn3.forEach((button) => {
             button.addEventListener("click", (e) => {
                 let btnId = e.target.id;
-                if (btnId === "increment3" && score3 < 5) {
+                if (btnId === "increment3" && score3 < 3) {
                     score3++;
                 } else if (btnId === "decrement3" && score3 != 0) {
                     score3--;
@@ -168,13 +182,26 @@
                     score3 = 0;
                 }
                 updateScore3();
+                post = 1
+                document.getElementById("#confirmButton").innerHTML = 'CHANGE CAPACITIES';
             })
         });
         updateScore3();
 
-
-
-        function updateValues() {
+        let post = 1
+        function updateValues(event) {
+            if (event instanceof SubmitEvent) {
+                if (post == 0) {
+                    fetch('/sorting', {
+                        method: 'GET'
+                    })
+                    post = 1
+                    return;
+                }
+            }
+            post = 0
+            document.getElementById("#confirmButton").innerHTML = 'CONFIRM?';
+            event.preventDefault();
             fetch('/sorting', {
                 method: 'POST',
                 headers: {

@@ -48,13 +48,19 @@
 				ISAIAI AIRPORT</h1>
 		</header>
 		<main class="content">
-			<h2>COLOR!</h2>
+			<h2>WEIGHT!</h2>
 			<form method="post">
 				<div class="buttons">
-					<button class="button sort" type="submit" name="sorting", value="next">SORT ITEM</button>
+					<button onclick="disableButton()" id="sortButton" class="button sort" type="submit" name="sorting", value="next">SORT ITEM</button>
 				</div>
 			</form>
 		</main>
 
+		<script>
+			function disableButton() {
+				button = document.getElementById("sortButton")
+				button.textContent = "SORT ITEM"
+			}
+		</script>
 </body>
 </html>
